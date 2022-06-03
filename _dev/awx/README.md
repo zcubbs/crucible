@@ -6,3 +6,8 @@ helm upgrade --install awx-operator awx-operator/awx-operator -n awx --create-na
 kubectl create ns awx-dev
 kubectl apply -f awx-dev.yaml
 ```
+
+To reset awx password:
+```powershell
+kubectl -n awx exec -it awx-dev-<POD_ID> -c awx-dev-web -- awx-manage changepassword admin
+```
