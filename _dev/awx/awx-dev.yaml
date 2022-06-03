@@ -1,0 +1,37 @@
+---
+apiVersion: awx.ansible.com/v1beta1
+kind: AWX
+metadata:
+  name: awx-dev
+  namespace: awx
+spec:
+  service_type: ClusterIP
+  ingress_type: none
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: awx-dev-admin-password
+  namespace: awx
+stringData:
+  password: "admin"
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: awx-dev
+  namespace: awx
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`awx.localhost`)
+      services:
+        - kind: Service
+          name: awx-dev-service
+          namespace: awx
+          passHostHeader: true
+          port: 80
