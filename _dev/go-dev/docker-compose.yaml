@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  crucible-cli:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    volumes:
+      - ../../go.work:/opt/app/go.work:ro
+      - ../../cli:/opt/app/cli:ro
+      - ../../vega:/opt/app/vega:ro
+      - ../../x:/opt/app/x:ro
