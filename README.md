@@ -9,8 +9,10 @@ An all-in-one tool for managing your air-gaped deployments with AWX.
 
 ## CLI
 
-```bash
-- Available Commands:
+```cmd
+crucible -h
+
+Available Commands:
 
   about       Print the info about crucible-cli
   completion  Generate the autocompletion script for the specified shell
