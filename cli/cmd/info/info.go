@@ -9,7 +9,7 @@ import (
 // Cmd represents the info command
 var Cmd = &cobra.Command{
 	Use:   "info",
-	Short: "info is a palette that contains system info commands",
+	Short: "Info is a palette that contains system info commands",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		err := cmd.Help()

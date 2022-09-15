@@ -8,7 +8,7 @@ import (
 // Cmd represents the os command
 var Cmd = &cobra.Command{
 	Use:   "k3s",
-	Short: "K3s Helper Commands",
+	Short: "K3s Management Commands",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("k3s called")

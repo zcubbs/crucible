@@ -1,4 +1,4 @@
-package helm
+package awx
 
 import (
 	"fmt"
@@ -7,10 +7,10 @@ import (
 
 // Cmd represents the os command
 var Cmd = &cobra.Command{
-	Use:   "helm",
-	Short: "Helm Application Deployment/Control Commands",
+	Use:   "awx",
+	Short: "Awx Instance Control Commands",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("helm called")
+		fmt.Println("awx called")
 	},
 }

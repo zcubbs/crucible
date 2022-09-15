@@ -14,7 +14,7 @@ import (
 // list represents the list command
 var list = &cobra.Command{
 	Use:   "list",
-	Short: "list all helm releases",
+	Short: "List all helm releases",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		homedir, err := os.UserHomeDir()

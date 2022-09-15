@@ -1,10 +1,12 @@
 package cmd
 
 import (
+	"crucible/cli/cmd/awx"
 	"crucible/cli/cmd/config"
 	"crucible/cli/cmd/helm"
 	"crucible/cli/cmd/info"
 	"crucible/cli/cmd/k3s"
+	"crucible/cli/cmd/k8s"
 	"crucible/cli/cmd/os"
 	"crucible/cli/configs"
 	"fmt"
@@ -61,6 +63,8 @@ func addSubCommandPalettes() {
 	rootCmd.AddCommand(config.Cmd)
 	rootCmd.AddCommand(os.Cmd)
 	rootCmd.AddCommand(k3s.Cmd)
+	rootCmd.AddCommand(k8s.Cmd)
 	rootCmd.AddCommand(info.Cmd)
 	rootCmd.AddCommand(helm.Cmd)
+	rootCmd.AddCommand(awx.Cmd)
 }

@@ -24,13 +24,15 @@ import (
 
 var settings = cli.New()
 
-// InstallChart
 func InstallChart(name, repo, namespace, version, chart string, values map[string]interface{}) {
 	actionConfig := new(action.Configuration)
 	if err := actionConfig.Init(settings.RESTClientGetter(), namespace, os.Getenv("HELM_DRIVER"), debug); err != nil {
 		log.Fatal(err)
 	}
+
 	client := action.NewInstall(actionConfig)
+
+	client.CreateNamespace = true
 
 	if version != "" {
 		client.Version = version
@@ -197,7 +199,6 @@ func RepoUpdate() {
 	fmt.Printf("Update Complete. ⎈ Happy Helming!⎈\n")
 }
 
-// UninstallChart
 func UninstallChart(name, namespace string) {
 	actionConfig := new(action.Configuration)
 	if err := actionConfig.Init(settings.RESTClientGetter(), namespace, os.Getenv("HELM_DRIVER"), debug); err != nil {

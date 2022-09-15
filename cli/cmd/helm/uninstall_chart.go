@@ -18,9 +18,6 @@ var uninstallChart = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		chartName := "nginx"
-		namespace := "default"
-
 		// Install charts
 		helm.UninstallChart(chartName, namespace)
 
@@ -31,5 +28,15 @@ var uninstallChart = &cobra.Command{
 }
 
 func init() {
+	uninstallChart.Flags().StringVarP(&chartName, "chart-name", "c", "", "Helm chart name")
+	uninstallChart.Flags().StringVarP(&namespace, "namespace", "n", "", "Helm chart namespace")
+
+	if err := uninstallChart.MarkFlagRequired("chart-name"); err != nil {
+		log.Println(err)
+	}
+	if err := uninstallChart.MarkFlagRequired("namespace"); err != nil {
+		log.Println(err)
+	}
+
 	Cmd.AddCommand(uninstallChart)
 }

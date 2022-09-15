@@ -10,7 +10,7 @@ import (
 // Cmd represents the config command
 var Cmd = &cobra.Command{
 	Use:   "config",
-	Short: "list cli configuration",
+	Short: "List cli configuration",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		jsonConfig, err := json.MarshalIndent(&configs.Config, "", "  ")
