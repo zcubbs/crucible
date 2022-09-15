@@ -74,5 +74,6 @@ func ExecuteInstallChartCmd(chartName, repoName, repoUrl, namespace, chartVersio
 	k8s.ExecuteCreateNamespaceCmd(namespace)
 	// Install charts
 	helm.InstallChart(chartName, repoName, namespace, chartVersion, chartName, chartValues)
-
+	// List helm releases
+	ExecuteHelmListCmd()
 }
