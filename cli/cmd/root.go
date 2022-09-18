@@ -34,7 +34,7 @@ var (
 		Long:  "",
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Printf(configs.Splash + "\n\n")
-			fmt.Println("steering-cli")
+			fmt.Println("crucible-cli")
 			fmt.Printf("Version: %s\n", configs.Version)
 			fmt.Println("This is a CLI for the Crucible Bot project")
 			fmt.Println("Copyright (c) 2022 zcubbs")
