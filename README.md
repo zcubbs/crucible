@@ -2,6 +2,7 @@
 
 An all-in-one tool for managing your air-gaped deployments with AWX.
 
+
 ---
 ![](_assets/crucible.png)
 
@@ -10,7 +11,14 @@ An all-in-one tool for managing your air-gaped deployments with AWX.
 ## CLI
 
 ```cmd
-crucible -h
+ _____ ______ _   _ _____ ___________ _      _____ 
+/  __ \| ___ \ | | /  __ \_   _| ___ \ |    |  ___|
+| /  \/| |_/ / | | | /  \/ | | | |_/ / |    | |__  
+| |    |    /| | | | |     | | | ___ \ |    |  __|
+| \__/\| |\ \| |_| | \__/\_| |_| |_/ / |____| |___
+ \____/\_| \_|\___/ \____/\___/\____/\_____/\____/
+
+> crucible -h
 
 Available Commands:
 
