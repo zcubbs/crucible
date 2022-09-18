@@ -53,7 +53,7 @@ release:
   prerelease: auto
   discussion_category_name: General
   header: |
-    ## Some title ({{ .Date }})
+    ## Crucible CLI ({{ .Date }})
     
     Welcome to this new release!
   footer: |
