@@ -38,3 +38,9 @@ func GetClientSet(kubeconfig string) *kubernetes.Clientset {
 
 	return cs
 }
+
+func Apply(kubeconfig string, yamlFile string) error {
+	//cs := GetClientSet(kubeconfig)
+
+	return nil
+}

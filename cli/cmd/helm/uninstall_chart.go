@@ -1,6 +1,7 @@
 package helm
 
 import (
+	"crucible/cli/configs"
 	"crucible/x/helm"
 	"github.com/spf13/cobra"
 	"log"
@@ -17,9 +18,9 @@ var uninstallChart = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-
+		kubeconfig = configs.Config.Kubeconfig.Path
 		// Install charts
-		helm.UninstallChart(chartName, namespace)
+		helm.UninstallChart(kubeconfig, chartName, namespace)
 
 		if err != nil {
 			log.Fatal("Could not uninstall helm release", err)

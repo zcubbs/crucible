@@ -3,6 +3,7 @@ package configs
 type Configuration struct {
 	Logging        `mapstructure:"logging" json:"logging"`
 	Keycloak       `mapstructure:"keycloak" json:"keycloak"`
+	Kubeconfig     `mapstructure:"kubeconfig" json:"kubeconfig"`
 	DefaultUsers   *[]DefaultUser   `mapstructure:"defaultUsers" json:"defaultUsers"`
 	DefaultClients *[]DefaultClient `mapstructure:"defaultClients" json:"defaultClients"`
 }
@@ -29,4 +30,8 @@ type DefaultUser struct {
 
 type DefaultClient struct {
 	ClientId string `mapstructure:"clientId" json:"clientId"`
+}
+
+type Kubeconfig struct {
+	Path string `mapstructure:"path" json:"path"`
 }

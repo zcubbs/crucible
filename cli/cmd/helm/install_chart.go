@@ -2,14 +2,15 @@ package helm
 
 import (
 	"crucible/cli/cmd/k8s"
+	"crucible/cli/configs"
 	"crucible/x/helm"
 	"fmt"
 	"github.com/spf13/cobra"
 	"log"
-	"os"
 )
 
 var (
+	kubeconfig   string
 	repoName     string
 	repoUrl      string
 	chartName    string
@@ -24,11 +25,10 @@ var installChart = &cobra.Command{
 	Short: "list all helm releases",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		_, err := os.UserHomeDir()
-		if err != nil {
-			log.Fatal(err)
-		}
 
+		kubeconfig = configs.Config.Kubeconfig.Path
+
+		fmt.Println("kubeconfig: ", kubeconfig)
 		fmt.Println("repoName: ", repoName)
 		fmt.Println("repoUrl: ", repoUrl)
 		fmt.Println("chartName: ", chartName)
@@ -37,7 +37,7 @@ var installChart = &cobra.Command{
 		fmt.Println("chartValues: ", chartValues)
 
 		// Execute Command
-		ExecuteInstallChartCmd(chartName, repoName, repoUrl, namespace, chartVersion, chartValues)
+		ExecuteInstallChartCmd(kubeconfig, chartName, repoName, repoUrl, namespace, chartVersion, chartValues)
 
 	},
 }
@@ -65,15 +65,15 @@ func init() {
 	Cmd.AddCommand(installChart)
 }
 
-func ExecuteInstallChartCmd(chartName, repoName, repoUrl, namespace, chartVersion string, chartValues map[string]interface{}) {
+func ExecuteInstallChartCmd(kubeconfig, chartName, repoName, repoUrl, namespace, chartVersion string, chartValues map[string]interface{}) {
 	// Add helm repo
 	helm.RepoAdd(repoName, repoUrl)
 	// Update charts from the helm repo
 	helm.RepoUpdate()
 	// Create Namespace
-	k8s.ExecuteCreateNamespaceCmd(namespace)
+	k8s.ExecuteCreateNamespaceCmd(kubeconfig, namespace)
 	// Install charts
-	helm.InstallChart(chartName, repoName, namespace, chartVersion, chartName, chartValues)
+	helm.InstallChart(kubeconfig, chartName, repoName, namespace, chartVersion, chartName, chartValues)
 	// List helm releases
 	ExecuteHelmListCmd()
 }

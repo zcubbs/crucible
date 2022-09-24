@@ -24,7 +24,8 @@ import (
 
 var settings = cli.New()
 
-func InstallChart(name, repo, namespace, version, chart string, values map[string]interface{}) {
+func InstallChart(kubeconfig, name, repo, namespace, version, chart string, values map[string]interface{}) {
+	settings.KubeConfig = kubeconfig
 	actionConfig := new(action.Configuration)
 	if err := actionConfig.Init(settings.RESTClientGetter(), namespace, os.Getenv("HELM_DRIVER"), debug); err != nil {
 		log.Fatal(err)
@@ -40,10 +41,6 @@ func InstallChart(name, repo, namespace, version, chart string, values map[strin
 
 	if client.Version == "" && client.Devel {
 		client.Version = ">0.0.0-0"
-	}
-
-	if namespace != "" {
-		client.Namespace = namespace
 	}
 
 	//name, chart, err := client.NameAndChart(args)
@@ -92,7 +89,7 @@ func InstallChart(name, repo, namespace, version, chart string, values map[strin
 		}
 	}
 
-	client.Namespace = settings.Namespace()
+	client.Namespace = namespace
 	release, err := client.Run(chartRequested, values)
 	if err != nil {
 		log.Fatal(err)
@@ -199,7 +196,8 @@ func RepoUpdate() {
 	fmt.Printf("Update Complete. ⎈ Happy Helming!⎈\n")
 }
 
-func UninstallChart(name, namespace string) {
+func UninstallChart(kubeconfig, name, namespace string) {
+	settings.KubeConfig = kubeconfig
 	actionConfig := new(action.Configuration)
 	if err := actionConfig.Init(settings.RESTClientGetter(), namespace, os.Getenv("HELM_DRIVER"), debug); err != nil {
 		log.Fatal(err)

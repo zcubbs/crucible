@@ -1,11 +1,10 @@
 package k8s
 
 import (
+	"crucible/cli/configs"
 	"crucible/x/kubectl"
-	"fmt"
 	"github.com/spf13/cobra"
 	"log"
-	"os"
 )
 
 var namespace string
@@ -16,18 +15,16 @@ var createNamespace = &cobra.Command{
 	Short: "Show k8s create-ns list",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		ExecuteCreateNamespaceCmd(namespace)
+		ExecuteCreateNamespaceCmd(
+			configs.Config.Kubeconfig.Path,
+			namespace,
+		)
 	},
 }
 
-func ExecuteCreateNamespaceCmd(namespace string) {
-	homedir, err := os.UserHomeDir()
-	if err != nil {
-		log.Fatal(err)
-	}
-	homedir = fmt.Sprintf("%s/.kube/config", homedir)
-	err = kubectl.CreateNamespace(
-		homedir,
+func ExecuteCreateNamespaceCmd(kubeconfig, namespace string) {
+	err := kubectl.CreateNamespace(
+		kubeconfig,
 		namespace,
 	)
 	if err != nil {

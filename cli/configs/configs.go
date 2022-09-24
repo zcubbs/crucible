@@ -15,7 +15,8 @@ var Config Configuration
 
 var (
 	defaults = map[string]interface{}{
-		"debug.enabled": false,
+		"debug.enabled":   true,
+		"kubeconfig.path": getUserHomePath() + "/.kube/config",
 	}
 	envPrefix   = "CRUCIBLE"
 	configName  = "config"
@@ -32,6 +33,7 @@ var allowedEnvVarKeys = []string{
 	"awx.password",
 	"k3s.version",
 	"debug.enabled",
+	"kubeconfig.path",
 }
 
 // Bootstrap reads in config file and ENV variables if set.

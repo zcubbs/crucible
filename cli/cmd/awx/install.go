@@ -2,13 +2,15 @@ package awx
 
 import (
 	"crucible/cli/cmd/helm"
+	"crucible/cli/configs"
 	"github.com/spf13/cobra"
 )
 
 var (
+	kubeconfig   string
 	awxVersion   string
 	namespace    string
-	chartVersion = "0.28.0"
+	chartVersion = "0.29.0"
 	repoUrl      = "https://ansible.github.io/awx-operator/"
 	repoName     = "awx-operator"
 	chartName    = "awx-operator"
@@ -27,7 +29,11 @@ var install = &cobra.Command{
 		if awxVersion == "" {
 			awxVersion = "19.1.0"
 		}
+
+		kubeconfig = configs.Config.Kubeconfig.Path
+
 		helm.ExecuteInstallChartCmd(
+			kubeconfig,
 			chartName,
 			repoName,
 			repoUrl,

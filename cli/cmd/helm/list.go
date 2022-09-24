@@ -1,9 +1,9 @@
 package helm
 
 import (
+	"crucible/cli/configs"
 	"crucible/x/helm"
 	"crucible/x/utils"
-	"fmt"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 	"log"
@@ -23,12 +23,8 @@ var list = &cobra.Command{
 }
 
 func ExecuteHelmListCmd() {
-	homedir, err := os.UserHomeDir()
-	if err != nil {
-		log.Fatal(err)
-	}
 	_releases, err := helm.GetAllReleases(
-		fmt.Sprintf("%s/%s", homedir, ".kube/config"),
+		configs.Config.Kubeconfig.Path,
 	)
 
 	if err != nil {

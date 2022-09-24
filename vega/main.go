@@ -1,7 +1,7 @@
 package main
 
 import (
-	awx "crucible/x/awx"
+	"crucible/x/awx"
 	"log"
 )
 
