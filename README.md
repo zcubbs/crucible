@@ -1,7 +1,8 @@
 # Crucible
 
-An all-in-one tool for managing your air-gaped deployments with AWX.
-
+An all-in-one CLI for managing your deployment control node with AWX. 
+Enables install of a single node K3s cluster, installs helm and AWX-Operator. Ones the operator is ready it depoloy one or more AWX instances. The auto configures the 
+AWX templates, credentials, and inventories through yaml config. The cli can also run job templates.
 
 ---
 ![](_assets/crucible.png)
