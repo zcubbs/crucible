@@ -1,0 +1,5 @@
+vega:
+  api:
+    username: user
+    password: pass
+    token_secret: secret

@@ -1,24 +1,24 @@
 package main
 
 import (
-	"crucible/vega/handlers"
+	"crucible/vega/configs"
 	"crucible/vega/routes"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"log"
 )
 
 func main() {
+	configs.Bootstrap()
 	app := fiber.New()
-
-	handlers.NewClient("http://localhost", "admin", "password")
-
 	// Routes
+	routes.OpsRoutes(app)
+	routes.AuthRoutes(app)
 	routes.AwxRoutes(app)
 	routes.SemaphoreRoutes(app)
-	routes.OpsRoutes(app)
 	routes.NotFoundRoute(app)
 
-	err := app.Listen(":8000")
+	err := app.Listen(fmt.Sprintf(":%d", configs.Config.API.Port))
 	if err != nil {
 		log.Fatal(err)
 	}

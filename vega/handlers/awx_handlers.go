@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"crucible/core/awx"
+	"crucible/vega/configs"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"log"
@@ -9,11 +10,12 @@ import (
 	"strconv"
 )
 
-var client *awx.AWX
-
-func NewClient(url, username, password string) {
-	client = awx.NewAWX(url, username, password, nil)
-}
+var client = awx.NewAWX(
+	configs.Config.Awx.URL,
+	configs.Config.Awx.Username,
+	configs.Config.Awx.Password,
+	nil,
+)
 
 func HandlePing(c *fiber.Ctx) error {
 	result, err := client.PingService.Ping()

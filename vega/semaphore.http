@@ -1,0 +1,13 @@
+# ----------------------------------Vega Auth API---------------------------------#
+### GET API Token
+POST http://localhost:8000/auth/token
+cache-control: no-cache
+Content-Type: application/x-www-form-urlencoded
+
+username={{username}}&password={{password}}
+
+> {% client.global.set("token", JSON.parse(JSON.stringify(response.body))["token"]);%}
+
+### GET Semaphore Projects
+GET http://localhost:8000/api/semaphore/projects
+Authorization: Bearer {{token}}
