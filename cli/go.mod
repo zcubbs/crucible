@@ -10,7 +10,7 @@ require (
 	github.com/shirou/gopsutil/v3 v3.22.8
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.13.0
-	
+
 )
 
 require (

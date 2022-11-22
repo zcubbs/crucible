@@ -2,7 +2,7 @@ package helm
 
 import (
 	"crucible/cli/configs"
-	"crucible/x/helm"
+	"crucible/core/helm"
 	"github.com/spf13/cobra"
 	"log"
 	"os"

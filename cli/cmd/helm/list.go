@@ -2,8 +2,8 @@ package helm
 
 import (
 	"crucible/cli/configs"
-	"crucible/x/helm"
-	"crucible/x/utils"
+	"crucible/core/helm"
+	"crucible/core/utils"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 	"log"

@@ -3,7 +3,7 @@ package helm
 import (
 	"crucible/cli/cmd/k8s"
 	"crucible/cli/configs"
-	"crucible/x/helm"
+	"crucible/core/helm"
 	"fmt"
 	"github.com/spf13/cobra"
 	"log"

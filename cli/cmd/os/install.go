@@ -1,7 +1,7 @@
 package os
 
 import (
-	xos "crucible/x/os"
+	xos "crucible/core/os"
 	"github.com/spf13/cobra"
 )
 

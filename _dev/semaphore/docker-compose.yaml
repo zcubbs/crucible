@@ -1,0 +1,50 @@
+services:
+  # uncomment this section and comment out the mysql section to use postgres instead of mysql
+  postgres:
+    restart: unless-stopped
+    ports:
+    - 5432:5432
+    image: postgres:14
+    hostname: postgres
+    volumes:
+      - semaphore-postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: semaphore
+      POSTGRES_PASSWORD: semaphore
+      POSTGRES_DB: semaphore
+
+#  mysql:
+#    restart: unless-stopped
+#    ports:
+#      - 3306:3306
+#    image: mysql:8.0
+#    hostname: mysql
+#    volumes:
+#      - semaphore-mysql:/var/lib/mysql
+#    environment:
+#      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+#      MYSQL_DATABASE: semaphore
+#      MYSQL_USER: semaphore
+#      MYSQL_PASSWORD: semaphore
+  semaphore:
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    image: semaphoreui/semaphore:latest
+    environment:
+      SEMAPHORE_DB_USER: semaphore
+      SEMAPHORE_DB_PASS: semaphore
+      SEMAPHORE_DB_HOST: postgres #change to postgres for postgres
+      SEMAPHORE_DB_PORT: 5432 # change to 5432 for postgres
+      SEMAPHORE_DB_DIALECT: postgres # change to postgres for postgres
+      SEMAPHORE_DB: semaphore # change to semaphore?sslmode=disable for postgres
+      SEMAPHORE_PLAYBOOK_PATH: /tmp/semaphore/
+      SEMAPHORE_ADMIN_PASSWORD: admin
+      SEMAPHORE_ADMIN_NAME: admin
+      SEMAPHORE_ADMIN_EMAIL: admin@localhost
+      SEMAPHORE_ADMIN: admin
+      SEMAPHORE_ACCESS_KEY_ENCRYPTION: gs72mPntFATGJs9qK0pQ0rKtfidlexiMjYCH9gWKhTU=
+    depends_on:
+      - mysql #change to postgres for postgres
+volumes:
+  semaphore-postgres: #switch to semaphore-postgres to use postgres

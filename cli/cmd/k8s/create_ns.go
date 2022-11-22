@@ -2,7 +2,7 @@ package k8s
 
 import (
 	"crucible/cli/configs"
-	"crucible/x/kubectl"
+	"crucible/core/kubectl"
 	"github.com/spf13/cobra"
 	"log"
 )

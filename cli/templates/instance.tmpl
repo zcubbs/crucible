@@ -1,0 +1,10 @@
+---
+
+apiVersion: awx.ansible.com/v1beta1
+kind: AWX
+metadata:
+  name: {{ .Name }}
+  namespace: {{ .Namespace }}
+spec:
+  service_type: ClusterIP
+  ingress_type: none

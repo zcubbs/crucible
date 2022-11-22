@@ -1,7 +1,7 @@
 package k3s
 
 import (
-	"crucible/x/k3s"
+	"crucible/core/k3s"
 	"github.com/spf13/cobra"
 )
 

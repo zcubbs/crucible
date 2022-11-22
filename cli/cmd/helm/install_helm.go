@@ -1,7 +1,7 @@
 package helm
 
 import (
-	"crucible/x/helm"
+	"crucible/core/helm"
 	"github.com/spf13/cobra"
 	"log"
 )

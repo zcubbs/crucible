@@ -1,41 +1,25 @@
 package main
 
 import (
-	"crucible/x/awx"
+	"crucible/vega/handlers"
+	"crucible/vega/routes"
+	"github.com/gofiber/fiber/v2"
 	"log"
 )
 
 func main() {
-	var (
-		jobTemplateId = 7
-		inventoryId   = 1
-	)
+	app := fiber.New()
 
-	a := awx.NewAWX("http://awx.localhost", "admin", "admin", nil)
-	result, err := a.PingService.Ping()
+	handlers.NewClient("http://localhost", "admin", "password")
+
+	// Routes
+	routes.AwxRoutes(app)
+	routes.SemaphoreRoutes(app)
+	routes.OpsRoutes(app)
+	routes.NotFoundRoute(app)
+
+	err := app.Listen(":8000")
 	if err != nil {
-		log.Fatalf("Ping a err: %s", err)
+		log.Fatal(err)
 	}
-
-	log.Println("Ping a: ", result)
-
-	// Run job
-	result2, err := a.JobTemplateService.Launch(jobTemplateId, map[string]interface{}{
-		"inventory": inventoryId,
-	}, map[string]string{})
-	if err != nil {
-		log.Fatalf("Lauch err: %s", err)
-	}
-
-	log.Println("Launch Job Template: ", result2)
-
-	resultJob, _, err2 := a.JobService.GetJobEvents(result2.Job, map[string]string{
-		"order_by":  "start_line",
-		"page_size": "1000000",
-	})
-	if err2 != nil {
-		log.Fatalf("Get Job Events err: %s", err)
-	}
-
-	log.Println("Get Job Events: ", resultJob)
 }
