@@ -1,8 +1,10 @@
 package routes
 
 import (
+	"crucible/vega/configs"
 	"crucible/vega/handlers"
 	"github.com/gofiber/fiber/v2"
+	jwtMiddleware "github.com/gofiber/jwt/v3"
 )
 
 func AuthRoutes(app *fiber.App) {
@@ -24,9 +26,9 @@ func AwxRoutes(app *fiber.App) {
 func SemaphoreRoutes(app *fiber.App) {
 	route := app.Group("/api/semaphore")
 
-	//route.Use(jwtMiddleware.New(jwtMiddleware.Config{
-	//	SigningKey: []byte(configs.Config.API.TokenSecret),
-	//}))
+	route.Use(jwtMiddleware.New(jwtMiddleware.Config{
+		SigningKey: []byte(configs.Config.API.TokenSecret),
+	}))
 
 	route.Get("/ping", handlers.HandleSemaphorePing)
 	route.Post("/auth", handlers.HandleSemaphoreLogin)

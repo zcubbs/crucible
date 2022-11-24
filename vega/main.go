@@ -8,8 +8,10 @@ import (
 	"log"
 )
 
-func main() {
+func init() {
 	configs.Bootstrap()
+}
+func main() {
 	app := fiber.New()
 	// Routes
 	routes.OpsRoutes(app)

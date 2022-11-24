@@ -15,11 +15,7 @@ var httpClient = resty.New()
 
 func HandleSemaphoreLogin(c *fiber.Ctx) error {
 
-	t, err := getUserToken(
-		configs.Config.Semaphore.URL,
-		configs.Config.Semaphore.Username,
-		configs.Config.Semaphore.Password,
-	)
+	t, err := getUserToken()
 
 	if err != nil {
 		return fiber.NewError(fiber.StatusForbidden, err.Error())
@@ -43,11 +39,7 @@ func HandleSemaphorePing(c *fiber.Ctx) error {
 }
 
 func HandleSemaphoreGetProjects(c *fiber.Ctx) error {
-	t, err := getUserToken(
-		configs.Config.Semaphore.URL,
-		configs.Config.Semaphore.Username,
-		configs.Config.Semaphore.Password,
-	)
+	t, err := getUserToken()
 
 	if err != nil {
 		log.Println(err)
@@ -71,7 +63,10 @@ func HandleSemaphoreGetProjects(c *fiber.Ctx) error {
 }
 
 func HandleSemaphoreGetProject(c *fiber.Ctx) error {
-	requestURL := fmt.Sprintf("%s/api/project/%d", 3000, 1)
+	requestURL := fmt.Sprintf("%s/api/project/%d",
+		configs.Config.Semaphore.URL,
+		1,
+	)
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {
 		return err
@@ -94,23 +89,23 @@ func HandleSemaphoreGetProject(c *fiber.Ctx) error {
 	return c.SendString(fmt.Sprintf("%s", resBody))
 }
 
-func getUserToken(url, username, password string) (*Token, error) {
-	cookies, err := fetchCookies(url, username, password)
+func getUserToken() (*Token, error) {
+	cookies, err := fetchCookies()
 	if err != nil {
 		return nil, err
 	}
 
-	t, err := fetchTokens(url, cookies)
+	t, err := fetchTokens(cookies)
 	if err != nil {
 		return nil, err
 	}
 
 	if len(*t) == 0 {
-		err = generateNewToken(url, cookies)
+		err = generateNewToken(cookies)
 		if err != nil {
 			return nil, err
 		}
-		t, err = fetchTokens(url, cookies)
+		t, err = fetchTokens(cookies)
 		if err != nil {
 			return nil, err
 		}
@@ -125,12 +120,12 @@ func getUserToken(url, username, password string) (*Token, error) {
 	return nil, fmt.Errorf("no valid token found")
 }
 
-func fetchTokens(url string, c []*http.Cookie) (*[]Token, error) {
+func fetchTokens(c []*http.Cookie) (*[]Token, error) {
 	r, err := httpClient.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("Accept", "application/json").
 		SetCookies(c).
-		Get(fmt.Sprintf("%s/api/user/tokens", url))
+		Get(fmt.Sprintf("%s/api/user/tokens", configs.Config.Semaphore.URL))
 
 	if err != nil {
 		return nil, err
@@ -145,12 +140,12 @@ func fetchTokens(url string, c []*http.Cookie) (*[]Token, error) {
 	return &tokens, nil
 }
 
-func generateNewToken(url string, c []*http.Cookie) error {
+func generateNewToken(c []*http.Cookie) error {
 	_, err := httpClient.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("Accept", "application/json").
 		SetCookies(c).
-		Post(fmt.Sprintf("%s/api/user/tokens", url))
+		Post(fmt.Sprintf("%s/api/user/tokens", configs.Config.Semaphore.URL))
 
 	if err != nil {
 		return err
@@ -159,12 +154,18 @@ func generateNewToken(url string, c []*http.Cookie) error {
 	return nil
 }
 
-func fetchCookies(url, username, password string) ([]*http.Cookie, error) {
+func fetchCookies() ([]*http.Cookie, error) {
 	resp, err := httpClient.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("Accept", "application/json").
-		SetBody(fmt.Sprintf(`{"auth": "%s", "password": "%s"}`, username, password)).
-		Post(fmt.Sprintf("%s/api/auth/login", url))
+		SetBody(
+			fmt.Sprintf(
+				`{"auth": "%s", "password": "%s"}`,
+				configs.Config.Semaphore.Username,
+				configs.Config.Semaphore.Password,
+			),
+		).
+		Post(fmt.Sprintf("%s/api/auth/login", configs.Config.Semaphore.URL))
 
 	if err != nil {
 		return nil, err
