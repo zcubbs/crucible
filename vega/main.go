@@ -22,6 +22,6 @@ func main() {
 
 	err := app.Listen(fmt.Sprintf(":%d", configs.Config.API.Port))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(fmt.Sprintf("failed to start server: %v", err))
 	}
 }

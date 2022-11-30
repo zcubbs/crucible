@@ -4,6 +4,6 @@ vega:
     password: pass
     token_secret: secret
   semaphore:
-    url: http://localhost:3000
+    url: http://localhost:9000
     username: admin
     password: admin

@@ -11,3 +11,12 @@ username={{username}}&password={{password}}
 ### GET Semaphore Projects
 GET http://localhost:8000/api/semaphore/projects
 Authorization: Bearer {{token}}
+
+### POST Semaphore Run Task Template
+POST http://localhost:8000/api/semaphore/run-task-template
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "template_id": 2
+}

@@ -34,6 +34,7 @@ func SemaphoreRoutes(app *fiber.App) {
 	route.Post("/auth", handlers.HandleSemaphoreLogin)
 	route.Get("/project", handlers.HandleSemaphoreGetProject)
 	route.Get("/projects", handlers.HandleSemaphoreGetProjects)
+	route.Post("/run-task-template", handlers.HandleSemaphoreRunTaskTemplate)
 }
 
 func OpsRoutes(app *fiber.App) {

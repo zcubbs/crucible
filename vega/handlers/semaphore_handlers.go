@@ -18,7 +18,9 @@ func HandleSemaphoreLogin(c *fiber.Ctx) error {
 	t, err := getUserToken()
 
 	if err != nil {
-		return fiber.NewError(fiber.StatusForbidden, err.Error())
+		return fiber.NewError(fiber.StatusForbidden,
+			fmt.Sprintf("failed to login to semaphore: %v", err.Error()),
+		)
 	}
 	return c.SendString(fmt.Sprintf("%v", t))
 }
@@ -87,6 +89,37 @@ func HandleSemaphoreGetProject(c *fiber.Ctx) error {
 	fmt.Printf("client: response body: %s\n", resBody)
 
 	return c.SendString(fmt.Sprintf("%s", resBody))
+}
+
+func HandleSemaphoreRunTaskTemplate(c *fiber.Ctx) error {
+	t, err := getUserToken()
+
+	if err != nil {
+		log.Println(err)
+		return fiber.NewError(fiber.StatusForbidden, err.Error())
+	}
+
+	client := resty.New()
+
+	resp, err := client.R().
+		SetHeader("Content-Type", "application/json").
+		SetHeader("Accept", "application/json").
+		SetHeader("Authorization", fmt.Sprintf("Bearer %s", t.Value)).
+		SetBody(
+			fmt.Sprintf(
+				`{"project_id": %d, "template_id": %d}`,
+				1,
+				1,
+			),
+		).
+		Post(fmt.Sprintf("%s/api/project/1/tasks", configs.Config.Semaphore.URL))
+
+	if err != nil {
+		log.Println(err)
+		return fiber.NewError(fiber.StatusInternalServerError, "An error occurred")
+	}
+
+	return c.SendString(fmt.Sprintf("%s", resp.Body()))
 }
 
 func getUserToken() (*Token, error) {
