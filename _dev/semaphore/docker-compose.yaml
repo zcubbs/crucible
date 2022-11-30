@@ -29,7 +29,7 @@ services:
   semaphore:
     restart: unless-stopped
     ports:
-      - 3000:3000
+      - 9000:3000
     image: semaphoreui/semaphore:latest
     environment:
       SEMAPHORE_DB_USER: semaphore
@@ -45,6 +45,6 @@ services:
       SEMAPHORE_ADMIN: admin
       SEMAPHORE_ACCESS_KEY_ENCRYPTION: gs72mPntFATGJs9qK0pQ0rKtfidlexiMjYCH9gWKhTU=
     depends_on:
-      - mysql #change to postgres for postgres
+      - postgres #change to postgres for postgres
 volumes:
   semaphore-postgres: #switch to semaphore-postgres to use postgres
