@@ -4,17 +4,42 @@ POST http://localhost:8000/auth/token
 cache-control: no-cache
 Content-Type: application/x-www-form-urlencoded
 
-username={{username}}&password={{password}}
+username={{ api_username }}&password={{ api_password }}
 
-> {% client.global.set("token", JSON.parse(JSON.stringify(response.body))["token"]);%}
+> {% client.global.set("api_token", JSON.parse(JSON.stringify(response.body))["token"]);%}
+
+### POST Semaphore add new project
+POST http://localhost:8000/api/semaphore/projects
+cache-control: no-cache
+Content-Type: application/json
+Authorization: Bearer {{ api_token }}
+
+{
+    "name": "{{ semaphore_test_project_name }}",
+    "alert": false
+}
+
+> {% client.global.set("semaphore_test_project_id", JSON.parse(String(response.body))["id"]);%}
+
+### POST Semaphore add new repository to "test" project
+POST http://localhost:8000/api/semaphore/project/{{ semaphore_test_project_id }}/repositories
+cache-control: no-cache
+Content-Type: application/json
+Authorization: Bearer {{ api_token }}
+
+{
+    "name": "{{ semaphore_test_repository_name }}",
+    "git_url": "{{ semaphore_test_repository_git_url }}",
+    "git_branch": "{{ semaphore_test_repository_git_branch }}"
+}
 
 ### GET Semaphore Projects
 GET http://localhost:8000/api/semaphore/projects
-Authorization: Bearer {{token}}
+Authorization: Bearer {{ api_token }}
 
 ### POST Semaphore Run Task Template
 POST http://localhost:8000/api/semaphore/run-task-template
-Authorization: Bearer {{token}}
+Authorization: Bearer {{ api_token }}
 Content-Type: application/json
 
 {

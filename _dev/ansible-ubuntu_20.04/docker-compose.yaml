@@ -1,0 +1,10 @@
+version: "3.2"
+services:
+#  ansible-runner:
+#    image: geerlingguy/docker-ubuntu2004-ansible:latest
+#    container_name: 'ansible-runnner'
+  ansible-host:
+    build: .
+    container_name: 'ansible-host'
+    ports:
+      - "2222:22"
