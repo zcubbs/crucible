@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"crucible/vega/configs"
+	"crucible/vega/models"
+	"crucible/vega/queries"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -35,7 +37,7 @@ func HandleSemaphorePing(c *fiber.Ctx) error {
 		Get(fmt.Sprintf("%s/api/ping", configs.Config.Semaphore.URL))
 
 	if err != nil {
-		log.Error(err)
+		log.Errorln(err)
 		return fiber.NewError(fiber.StatusInternalServerError, "An error occurred")
 	}
 
@@ -46,7 +48,7 @@ func HandleSemaphoreGetProjects(c *fiber.Ctx) error {
 	t, err := getUserToken()
 
 	if err != nil {
-		log.Error(err)
+		log.Errorln(err)
 		return fiber.NewError(fiber.StatusForbidden, err.Error())
 	}
 
@@ -59,7 +61,7 @@ func HandleSemaphoreGetProjects(c *fiber.Ctx) error {
 		Get(fmt.Sprintf("%s/api/projects", configs.Config.Semaphore.URL))
 
 	if err != nil {
-		log.Error(err)
+		log.Errorln(err)
 		return fiber.NewError(fiber.StatusInternalServerError, "An error occurred")
 	}
 
@@ -93,8 +95,8 @@ func HandleSemaphoreGetProject(c *fiber.Ctx) error {
 	return c.SendString(fmt.Sprintf("%s", resBody))
 }
 
-func getProjectByName(name string) (Project, error) {
-	var project Project
+func getProjectByName(name string) (models.Project, error) {
+	var project models.Project
 
 	t, err := getUserToken()
 
@@ -116,7 +118,7 @@ func getProjectByName(name string) (Project, error) {
 		return project, err
 	}
 
-	var projects []Project
+	var projects []models.Project
 
 	err = json.Unmarshal(resp.Body(), &projects)
 	if err != nil {
@@ -133,8 +135,48 @@ func getProjectByName(name string) (Project, error) {
 	return project, fmt.Errorf("project not found")
 }
 
+func getRepositoryByName(projectId int, name string) (models.Repository, error) {
+	var repository models.Repository
+
+	t, err := getUserToken()
+
+	if err != nil {
+		log.Println(err)
+		return repository, err
+	}
+
+	client := resty.New()
+
+	resp, err := client.R().
+		SetHeader("Content-Type", "application/json").
+		SetHeader("Accept", "application/json").
+		SetHeader("Authorization", fmt.Sprintf("Bearer %s", t.Value)).
+		Get(fmt.Sprintf("%s/api/project/%d/repositories", configs.Config.Semaphore.URL, projectId))
+
+	if err != nil {
+		log.Println(err)
+		return repository, err
+	}
+
+	var repositories []models.Repository
+
+	err = json.Unmarshal(resp.Body(), &repositories)
+	if err != nil {
+		log.Println(err)
+		return repository, err
+	}
+
+	for _, r := range repositories {
+		if r.Name == name {
+			return r, nil
+		}
+	}
+
+	return repository, fmt.Errorf("repository not found")
+}
+
 func HandleSemaphoreCreateProject(c *fiber.Ctx) error {
-	var project Project
+	var project models.Project
 
 	err := c.BodyParser(&project)
 	if err != nil {
@@ -178,7 +220,7 @@ func HandleSemaphoreCreateProject(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusInternalServerError, "An error occurred")
 	}
 
-	var createdProject Project
+	var createdProject models.Project
 
 	err = json.Unmarshal(resp.Body(), &createdProject)
 	if err != nil {
@@ -202,7 +244,7 @@ func HandleSemaphoreCreateRepository(c *fiber.Ctx) error {
 
 	pIdIntVal, err := strconv.Atoi(pId)
 
-	var repository Repository
+	var repository models.Repository
 
 	err = c.BodyParser(&repository)
 
@@ -225,14 +267,19 @@ func HandleSemaphoreCreateRepository(c *fiber.Ctx) error {
 	t, err := getUserToken()
 
 	if err != nil {
-		log.Error(err)
+		log.Errorln(err)
 		return fiber.NewError(fiber.StatusForbidden, err.Error())
+	}
+
+	r, err := getRepositoryByName(pIdIntVal, repository.Name)
+	if err == nil {
+		return c.SendString(fmt.Sprintf(`{"id": "%d"}`, r.Id))
 	}
 
 	sshKey, err := getSSHKeyByName(pIdIntVal, "none")
 
 	if err != nil {
-		log.Error(err)
+		log.Errorln(err)
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 
@@ -302,8 +349,8 @@ func createNoneSshKey(projectId int) error {
 	return nil
 }
 
-func getSSHKeyByName(projectId int, name string) (SshKey, error) {
-	var sshKey SshKey
+func getSSHKeyByName(projectId int, name string) (models.SshKey, error) {
+	var sshKey models.SshKey
 
 	t, err := getUserToken()
 
@@ -323,7 +370,7 @@ func getSSHKeyByName(projectId int, name string) (SshKey, error) {
 		return sshKey, errors.New(fmt.Sprintf("getSSHKeyByName() An error occurred while calling semaphore API: %s - %s", err.Error(), resp.Body()))
 	}
 
-	var sshKeys []SshKey
+	var sshKeys []models.SshKey
 
 	err = json.Unmarshal(resp.Body(), &sshKeys)
 	if err != nil {
@@ -339,12 +386,49 @@ func getSSHKeyByName(projectId int, name string) (SshKey, error) {
 	return sshKey, errors.New(fmt.Sprintf("getSSHKeyByName() SSH key with name '%s' not found", name))
 }
 
+func getInventoryByName(projectId int, name string) (models.Inventory, error) {
+	var inventory models.Inventory
+
+	t, err := getUserToken()
+
+	if err != nil {
+		return inventory, errors.New(fmt.Sprintf("getInventoryByName() An error occurred while getting token: %s", err.Error()))
+	}
+
+	client := resty.New()
+
+	resp, err := client.R().
+		SetHeader("Content-Type", "application/json").
+		SetHeader("Accept", "application/json").
+		SetHeader("Authorization", fmt.Sprintf("Bearer %s", t.Value)).
+		Get(fmt.Sprintf("%s/api/project/%d/inventory", configs.Config.Semaphore.URL, projectId))
+
+	if err != nil {
+		return inventory, errors.New(fmt.Sprintf("getInventoryByName() An error occurred while calling semaphore API: %s - %s", err.Error(), resp.Body()))
+	}
+
+	var inventories []models.Inventory
+
+	err = json.Unmarshal(resp.Body(), &inventories)
+	if err != nil {
+		return inventory, errors.New(fmt.Sprintf("getInventoryByName() An error occurred while unmarshalling response: %s", err.Error()))
+	}
+
+	for _, i := range inventories {
+		if i.Name == name {
+			return i, nil
+		}
+	}
+
+	return inventory, errors.New(fmt.Sprintf("getInventoryByName() Inventory with name '%s' not found", name))
+}
+
 func HandleSemaphoreCreateSSHKey(c *fiber.Ctx) error {
-	var sshKey SshKey
+	var sshKey models.SshKey
 
 	err := c.BodyParser(&sshKey)
 	if err != nil {
-		log.Error(err)
+		log.Errorln(err)
 		return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
 	}
 
@@ -394,11 +478,11 @@ func HandleSemaphoreAddInventory(c *fiber.Ctx) error {
 
 	pIdIntVal, err := strconv.Atoi(pId)
 
-	var inventory Inventory
+	var inventory models.Inventory
 
 	err = c.BodyParser(&inventory)
 	if err != nil {
-		log.Error(err)
+		log.Errorln(err)
 		return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
 	}
 
@@ -412,14 +496,17 @@ func HandleSemaphoreAddInventory(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "missing inventory value")
 	}
 
-	t, err := getUserToken()
-
 	if err != nil {
 		log.Println(err)
 		return fiber.NewError(fiber.StatusForbidden, err.Error())
 	}
 
-	client := resty.New()
+	existingInv, err := getInventoryByName(pIdIntVal, inventory.Name)
+
+	if err == nil {
+		log.Infof("Inventory with name '%s' already exists", existingInv.Name)
+		return c.SendString(fmt.Sprintf(`{"id":%d}`, existingInv.Id))
+	}
 
 	sshKey, err := getSSHKeyByName(pIdIntVal, "none")
 
@@ -427,6 +514,69 @@ func HandleSemaphoreAddInventory(c *fiber.Ctx) error {
 		log.Println(err)
 		return fiber.NewError(fiber.StatusForbidden, err.Error())
 	}
+
+	inventory.SshKeyId = sshKey.Id
+
+	inventory.Type = "static"
+
+	err = queries.Database.AddInventory(c.Context(), pIdIntVal, inventory)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	inv, err := getInventoryByName(pIdIntVal, inventory.Name)
+
+	if err != nil {
+		log.Println(err)
+		return fiber.NewError(fiber.StatusForbidden, err.Error())
+	}
+
+	return c.SendString(fmt.Sprintf(`{"id":%d}`, inv.Id))
+}
+
+func HandleSemaphoreCreateEnvironment(c *fiber.Ctx) error {
+	pId := c.Params("id")
+	if pId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "missing project id")
+	}
+
+	pIdIntVal, err := strconv.Atoi(pId)
+
+	var environment models.Environment
+
+	err = c.BodyParser(&environment)
+	if err != nil {
+		log.Errorln(err)
+		return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
+	}
+
+	if environment.Name == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "missing environment name")
+	}
+
+	if environment.ProjectId == 0 {
+		return fiber.NewError(fiber.StatusBadRequest, "missing inventory id")
+	}
+
+	if err != nil {
+		log.Println(err)
+		return fiber.NewError(fiber.StatusForbidden, err.Error())
+	}
+
+	existingEnv, err := getEnvironmentByName(pIdIntVal, environment.Name)
+
+	if err == nil {
+		return c.SendString(fmt.Sprintf(`{"id": %d}`, existingEnv.Id))
+	}
+
+	t, err := getUserToken()
+
+	if err != nil {
+		log.Errorln(err)
+		return fiber.NewError(fiber.StatusForbidden, err.Error())
+	}
+
+	client := resty.New()
 
 	resp, err := client.R().
 		SetHeader("Content-Type", "application/json").
@@ -436,26 +586,197 @@ func HandleSemaphoreAddInventory(c *fiber.Ctx) error {
 			fmt.Sprintf(
 				`{
 							"name": "%s", 
-							"inventory": "%s",
-							"project_id": %d
-							"type": "static",
-							"ssh_key_id": %d
+							"project_id": %d,
+							"json": "{}"
 						}`,
-				inventory.Name,
-				inventory.Value,
+				environment.Name,
 				pIdIntVal,
-				sshKey.Id,
 			),
 		).
-		Post(fmt.Sprintf("%s/api/project/%d/inventory",
-			configs.Config.Semaphore.URL, pIdIntVal))
+		Post(fmt.Sprintf("%s/api/project/%d/environment", configs.Config.Semaphore.URL, pIdIntVal))
+
+	if err != nil {
+		log.Errorln(err)
+		return fiber.NewError(fiber.StatusInternalServerError, "An error occurred")
+	}
+
+	nEnv, err := getEnvironmentByName(pIdIntVal, environment.Name)
+
+	if err != nil {
+		log.Errorln(err, resp.Body())
+	}
+
+	return c.SendString(fmt.Sprintf(`{"id": %d}`, nEnv.Id))
+}
+
+func getEnvironmentByName(pId int, name string) (models.Environment, error) {
+	var environment models.Environment
+
+	t, err := getUserToken()
+
+	if err != nil {
+		return environment, errors.New(fmt.Sprintf("getEnvironmentByName() An error occurred while getting token: %s", err.Error()))
+	}
+
+	client := resty.New()
+
+	resp, err := client.R().
+		SetHeader("Content-Type", "application/json").
+		SetHeader("Accept", "application/json").
+		SetHeader("Authorization", fmt.Sprintf("Bearer %s", t.Value)).
+		Get(fmt.Sprintf("%s/api/project/%d/environment", configs.Config.Semaphore.URL, pId))
+
+	if err != nil {
+		log.Errorln(err)
+		return environment, err
+	}
+
+	var environments []models.Environment
+
+	err = json.Unmarshal(resp.Body(), &environments)
+
+	if err != nil {
+		log.Errorln(err)
+		return environment, err
+	}
+
+	for _, env := range environments {
+		if env.Name == name {
+			return env, nil
+		}
+	}
+
+	return environment, errors.New(fmt.Sprintf("Environment with name '%s' not found", name))
+}
+
+func HandleSemaphoreCreateTemplate(c *fiber.Ctx) error {
+	pId := c.Params("id")
+	if pId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "missing project id")
+	}
+
+	pIdIntVal, err := strconv.Atoi(pId)
+
+	var template models.Template
+
+	err = c.BodyParser(&template)
+	if err != nil {
+		log.Errorln(err)
+		return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
+	}
+
+	if template.Alias == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "missing template alias")
+	}
+
+	if template.ProjectId == 0 {
+		return fiber.NewError(fiber.StatusBadRequest, "missing project id")
+	}
+
+	if template.RepositoryId == 0 {
+		return fiber.NewError(fiber.StatusBadRequest, "missing repository id")
+	}
+
+	if template.InventoryId == 0 {
+		return fiber.NewError(fiber.StatusBadRequest, "missing inventory id")
+	}
+
+	if template.EnvironmentId == 0 {
+		return fiber.NewError(fiber.StatusBadRequest, "missing environment id")
+	}
 
 	if err != nil {
 		log.Println(err)
+		return fiber.NewError(fiber.StatusForbidden, err.Error())
+	}
+
+	existingTemplate, err := getTemplateByName(pIdIntVal, template.Alias)
+
+	if err == nil {
+		return c.SendString(fmt.Sprintf("Template with name '%s' already exists", existingTemplate.Alias))
+	}
+
+	t, err := getUserToken()
+
+	if err != nil {
+		log.Errorln(err)
+		return fiber.NewError(fiber.StatusForbidden, err.Error())
+	}
+
+	client := resty.New()
+
+	resp, err := client.R().
+		SetHeader("Content-Type", "application/json").
+		SetHeader("Accept", "application/json").
+		SetHeader("Authorization", fmt.Sprintf("Bearer %s", t.Value)).
+		SetBody(
+			fmt.Sprintf(
+				`{
+						  "project_id": %d,
+						  "inventory_id": %d,
+						  "repository_id": %d,
+						  "environment_id": %d,
+						  "alias": "%s",
+						  "playbook": "%s",
+						  "description": "%s"
+						}`,
+				pIdIntVal,
+				template.InventoryId,
+				template.RepositoryId,
+				template.EnvironmentId,
+				template.Alias,
+				template.Playbook,
+				template.Description,
+			),
+		).
+		Post(fmt.Sprintf("%s/api/project/%d/template", configs.Config.Semaphore.URL, pIdIntVal))
+
+	if err != nil {
+		log.Errorln(err)
 		return fiber.NewError(fiber.StatusInternalServerError, "An error occurred")
 	}
 
 	return c.SendString(fmt.Sprintf("%s", resp.Body()))
+}
+
+func getTemplateByName(pId int, name string) (models.Template, error) {
+	var template models.Template
+
+	t, err := getUserToken()
+
+	if err != nil {
+		return template, errors.New(fmt.Sprintf("getTemplateByName() An error occurred while getting token: %s", err.Error()))
+	}
+
+	client := resty.New()
+
+	resp, err := client.R().
+		SetHeader("Content-Type", "application/json").
+		SetHeader("Accept", "application/json").
+		SetHeader("Authorization", fmt.Sprintf("Bearer %s", t.Value)).
+		Get(fmt.Sprintf("%s/api/project/%d/template", configs.Config.Semaphore.URL, pId))
+
+	if err != nil {
+		log.Errorln(err)
+		return template, err
+	}
+
+	var templates []models.Template
+
+	err = json.Unmarshal(resp.Body(), &templates)
+
+	if err != nil {
+		log.Errorln(err)
+		return template, err
+	}
+
+	for _, t := range templates {
+		if t.Alias == name {
+			return t, nil
+		}
+	}
+
+	return template, errors.New(fmt.Sprintf("Template with name '%s' not found", name))
 }
 
 func HandleSemaphoreRunTaskTemplate(c *fiber.Ctx) error {
@@ -579,38 +900,4 @@ type Token struct {
 	CreatedAt string `json:"created"`
 	Expired   bool   `json:"expired"`
 	UserId    int    `json:"user_id"`
-}
-
-type Project struct {
-	Id          int    `json:"id,omitempty"`
-	Name        string `json:"name,omitempty"`
-	Description string `json:"description,omitempty"`
-	Alert       bool   `json:"alert,omitempty"`
-}
-
-type Repository struct {
-	Id          int    `json:"id,omitempty"`
-	Name        string `json:"name"`
-	ProjectId   int    `json:"project_id"`
-	GitUrl      string `json:"git_url"`
-	GitBranch   string `json:"git_branch"`
-	SshKeyId    int    `json:"ssh_key_id"`
-	LastUpdated string `json:"last_updated"`
-}
-
-type SshKey struct {
-	Id        int    `json:"id,omitempty"`
-	Name      string `json:"name"`
-	Value     string `json:"value"`
-	Type      string `json:"type"`
-	ProjectId int    `json:"project_id"`
-}
-
-type Inventory struct {
-	Id        int    `json:"id,omitempty"`
-	Name      string `json:"name"`
-	Value     string `json:"value"`
-	ProjectId int    `json:"project_id"`
-	SshKeyId  int    `json:"ssh_key_id"`
-	Type      string `json:"type"`
 }

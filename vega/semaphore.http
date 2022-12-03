@@ -46,6 +46,39 @@ Authorization: Bearer {{ api_token }}
     "value": "{{ semaphore_test_inventory_content }}"
 }
 
+> {% client.global.set("semaphore_test_inventory_id", JSON.parse(String(response.body))["id"]);%}
+
+### POST Semaphore add new environment to "test" project
+POST http://localhost:8000/api/semaphore/project/{{ semaphore_test_project_id }}/environment
+cache-control: no-cache
+Content-Type: application/json
+Authorization: Bearer {{ api_token }}
+
+{
+    "name": "{{ semaphore_test_environment_name }}",
+    "project_id": {{ semaphore_test_project_id }}
+}
+
+> {% client.global.set("semaphore_test_environment_id", JSON.parse(String(response.body))["id"]);%}
+
+### POST Semaphore add new template to "test" project
+POST http://localhost:8000/api/semaphore/project/{{ semaphore_test_project_id }}/templates
+cache-control: no-cache
+Content-Type: application/json
+Authorization: Bearer {{ api_token }}
+
+{
+  "project_id": {{ semaphore_test_project_id }},
+  "inventory_id": {{ semaphore_test_inventory_id }},
+  "repository_id": {{ semaphore_test_repository_id }},
+  "environment_id": {{ semaphore_test_environment_id }},
+  "alias": "{{ semaphore_test_template_alias }}",
+  "playbook": "{{ semaphore_test_template_playbook }}",
+  "arguments": "{{ semaphore_test_template_arguments }}",
+  "description": "{{ semaphore_test_template_description }}",
+  "override_args": true
+}
+
 ### GET Semaphore Projects
 GET http://localhost:8000/api/semaphore/projects
 Authorization: Bearer {{ api_token }}

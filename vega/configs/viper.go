@@ -34,6 +34,17 @@ type Semaphore struct {
 	URL      string `mapstructure:"url" json:"url"`
 	Username string `mapstructure:"username" json:"username"`
 	Password string `mapstructure:"password" json:"password"`
+	Postgres `mapstructure:"postgres" json:"postgres"`
+}
+
+type Postgres struct {
+	Host     string `mapstructure:"host" json:"host"`
+	Port     int    `mapstructure:"port" json:"port"`
+	Username string `mapstructure:"username" json:"username"`
+	Password string `mapstructure:"password" json:"password"`
+	Database string `mapstructure:"database" json:"database"`
+	SslMode  bool   `mapstructure:"ssl_mode" json:"ssl_mode"`
+	Verbose  bool   `mapstructure:"verbose" json:"verbose"`
 }
 
 type Awx struct {
@@ -44,8 +55,15 @@ type Awx struct {
 
 var (
 	defaults = map[string]interface{}{
-		"debug.enabled": false,
-		"vega.api.port": 8000,
+		"debug.enabled":                    false,
+		"vega.api.port":                    8000,
+		"vega.semaphore.postgres.host":     "localhost",
+		"vega.semaphore.postgres.port":     5432,
+		"vega.semaphore.postgres.username": "semaphore",
+		"vega.semaphore.postgres.password": "semaphore",
+		"vega.semaphore.postgres.database": "semaphore",
+		"vega.semaphore.postgres.ssl_mode": false,
+		"vega.semaphore.postgres.verbose":  false,
 	}
 	envPrefix   = "CRUCIBLE"
 	configName  = "config"
@@ -60,6 +78,13 @@ var allowedEnvVarKeys = []string{
 	"vega.semaphore.url",
 	"vega.semaphore.username",
 	"vega.semaphore.password",
+	"vega.semaphore.postgres.host",
+	"vega.semaphore.postgres.port",
+	"vega.semaphore.postgres.username",
+	"vega.semaphore.postgres.password",
+	"vega.semaphore.postgres.database",
+	"vega.semaphore.postgres.ssl_mode",
+	"vega.semaphore.postgres.verbose",
 	"debug.enabled",
 }
 

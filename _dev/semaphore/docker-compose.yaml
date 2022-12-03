@@ -1,9 +1,10 @@
+version: "3.2"
 services:
   # uncomment this section and comment out the mysql section to use postgres instead of mysql
   postgres:
     restart: unless-stopped
     ports:
-    - 5432:5432
+    - "5432:5432"
     image: postgres:14
     hostname: postgres
     volumes:
@@ -29,7 +30,7 @@ services:
   semaphore:
     restart: unless-stopped
     ports:
-      - 9000:3000
+      - "9000:3000"
     image: semaphoreui/semaphore:latest
     environment:
       SEMAPHORE_DB_USER: semaphore

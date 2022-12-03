@@ -1,7 +1,9 @@
 package main
 
 import (
+	"crucible/core/postgres"
 	"crucible/vega/configs"
+	"crucible/vega/queries"
 	"crucible/vega/routes"
 	"fmt"
 	"github.com/common-nighthawk/go-figure"
@@ -19,6 +21,18 @@ func init() {
 	configs.Bootstrap()
 }
 func main() {
+	db := postgres.Connect(postgres.DBConfig{
+		Host:     configs.Config.Postgres.Host,
+		Port:     configs.Config.Postgres.Port,
+		User:     configs.Config.Postgres.Username,
+		Password: configs.Config.Postgres.Password,
+		Database: configs.Config.Postgres.Database,
+		SslMode:  configs.Config.Postgres.SslMode,
+		Verbose:  configs.Config.Postgres.Verbose,
+	})
+
+	queries.Database = &queries.DB{DB: db}
+
 	app := fiber.New(fiber.Config{
 		DisableStartupMessage: true,
 		AppName:               "Vega v1.0.0",
