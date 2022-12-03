@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"github.com/go-resty/resty/v2"
 	"github.com/gofiber/fiber/v2"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -35,7 +35,7 @@ func HandleSemaphorePing(c *fiber.Ctx) error {
 		Get(fmt.Sprintf("%s/api/ping", configs.Config.Semaphore.URL))
 
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return fiber.NewError(fiber.StatusInternalServerError, "An error occurred")
 	}
 
@@ -46,7 +46,7 @@ func HandleSemaphoreGetProjects(c *fiber.Ctx) error {
 	t, err := getUserToken()
 
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return fiber.NewError(fiber.StatusForbidden, err.Error())
 	}
 
@@ -59,7 +59,7 @@ func HandleSemaphoreGetProjects(c *fiber.Ctx) error {
 		Get(fmt.Sprintf("%s/api/projects", configs.Config.Semaphore.URL))
 
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return fiber.NewError(fiber.StatusInternalServerError, "An error occurred")
 	}
 
@@ -225,9 +225,18 @@ func HandleSemaphoreCreateRepository(c *fiber.Ctx) error {
 	t, err := getUserToken()
 
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return fiber.NewError(fiber.StatusForbidden, err.Error())
 	}
+
+	sshKey, err := getSSHKeyByName(pIdIntVal, "none")
+
+	if err != nil {
+		log.Error(err)
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	log.Infoln(sshKey)
 
 	client := resty.New()
 
@@ -239,16 +248,16 @@ func HandleSemaphoreCreateRepository(c *fiber.Ctx) error {
 			fmt.Sprintf(
 				`{
 						"project_id": %d, 
-						"name": %s, 
-						"git_url": %s,, 
-						"git_branch": %s, 
+						"name": "%s", 
+						"git_url": "%s", 
+						"git_branch": "%s", 
 						"ssh_key_id": %d
 						}`,
 				pIdIntVal,            // project id
 				repository.Name,      // repository name
 				repository.GitUrl,    // repository url "github.com/XXX/test-repo.git"
 				repository.GitBranch, // repository branch
-				0,                    // ssh key id
+				sshKey.Id,            // ssh key id
 			),
 		).
 		Post(fmt.Sprintf("%s/api/project/%d/repositories", configs.Config.Semaphore.URL, pIdIntVal))
@@ -293,12 +302,49 @@ func createNoneSshKey(projectId int) error {
 	return nil
 }
 
+func getSSHKeyByName(projectId int, name string) (SshKey, error) {
+	var sshKey SshKey
+
+	t, err := getUserToken()
+
+	if err != nil {
+		return sshKey, errors.New(fmt.Sprintf("getSSHKeyByName() An error occurred while getting token: %s", err.Error()))
+	}
+
+	client := resty.New()
+
+	resp, err := client.R().
+		SetHeader("Content-Type", "application/json").
+		SetHeader("Accept", "application/json").
+		SetHeader("Authorization", fmt.Sprintf("Bearer %s", t.Value)).
+		Get(fmt.Sprintf("%s/api/project/%d/keys", configs.Config.Semaphore.URL, projectId))
+
+	if err != nil {
+		return sshKey, errors.New(fmt.Sprintf("getSSHKeyByName() An error occurred while calling semaphore API: %s - %s", err.Error(), resp.Body()))
+	}
+
+	var sshKeys []SshKey
+
+	err = json.Unmarshal(resp.Body(), &sshKeys)
+	if err != nil {
+		return sshKey, errors.New(fmt.Sprintf("getSSHKeyByName() An error occurred while unmarshalling response: %s", err.Error()))
+	}
+
+	for _, k := range sshKeys {
+		if k.Name == name {
+			return k, nil
+		}
+	}
+
+	return sshKey, errors.New(fmt.Sprintf("getSSHKeyByName() SSH key with name '%s' not found", name))
+}
+
 func HandleSemaphoreCreateSSHKey(c *fiber.Ctx) error {
 	var sshKey SshKey
 
 	err := c.BodyParser(&sshKey)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
 	}
 
@@ -331,6 +377,78 @@ func HandleSemaphoreCreateSSHKey(c *fiber.Ctx) error {
 			),
 		).
 		Post(fmt.Sprintf("%s/api/ssh_keys", configs.Config.Semaphore.URL))
+
+	if err != nil {
+		log.Println(err)
+		return fiber.NewError(fiber.StatusInternalServerError, "An error occurred")
+	}
+
+	return c.SendString(fmt.Sprintf("%s", resp.Body()))
+}
+
+func HandleSemaphoreAddInventory(c *fiber.Ctx) error {
+	pId := c.Params("id")
+	if pId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "missing project id")
+	}
+
+	pIdIntVal, err := strconv.Atoi(pId)
+
+	var inventory Inventory
+
+	err = c.BodyParser(&inventory)
+	if err != nil {
+		log.Error(err)
+		return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
+	}
+
+	log.Infoln(inventory)
+
+	if inventory.Name == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "missing inventory name")
+	}
+
+	if inventory.Value == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "missing inventory value")
+	}
+
+	t, err := getUserToken()
+
+	if err != nil {
+		log.Println(err)
+		return fiber.NewError(fiber.StatusForbidden, err.Error())
+	}
+
+	client := resty.New()
+
+	sshKey, err := getSSHKeyByName(pIdIntVal, "none")
+
+	if err != nil {
+		log.Println(err)
+		return fiber.NewError(fiber.StatusForbidden, err.Error())
+	}
+
+	resp, err := client.R().
+		SetHeader("Content-Type", "application/json").
+		SetHeader("Accept", "application/json").
+		SetHeader("Authorization", fmt.Sprintf("Bearer %s", t.Value)).
+		SetBody(
+			fmt.Sprintf(
+				`{
+							"name": "%s", 
+							"inventory": "%s",
+							"project_id": %d
+							"type": "static",
+							"ssh_key_id": %d
+						}`,
+				inventory.Name,
+				inventory.Value,
+				pIdIntVal,
+				sshKey.Id,
+			),
+		).
+		Post(fmt.Sprintf("%s/api/project/%d/inventory",
+			configs.Config.Semaphore.URL, pIdIntVal))
 
 	if err != nil {
 		log.Println(err)
@@ -486,4 +604,13 @@ type SshKey struct {
 	Value     string `json:"value"`
 	Type      string `json:"type"`
 	ProjectId int    `json:"project_id"`
+}
+
+type Inventory struct {
+	Id        int    `json:"id,omitempty"`
+	Name      string `json:"name"`
+	Value     string `json:"value"`
+	ProjectId int    `json:"project_id"`
+	SshKeyId  int    `json:"ssh_key_id"`
+	Type      string `json:"type"`
 }

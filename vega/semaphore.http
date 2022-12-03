@@ -33,6 +33,19 @@ Authorization: Bearer {{ api_token }}
     "git_branch": "{{ semaphore_test_repository_git_branch }}"
 }
 
+> {% client.global.set("semaphore_test_repository_id", JSON.parse(String(response.body))["id"]);%}
+
+### POST Semaphore add inventory to "test" project
+POST http://localhost:8000/api/semaphore/project/{{ semaphore_test_project_id }}/inventory
+cache-control: no-cache
+Content-Type: application/json
+Authorization: Bearer {{ api_token }}
+
+{
+    "name": "{{ semaphore_test_inventory_name }}",
+    "value": "{{ semaphore_test_inventory_content }}"
+}
+
 ### GET Semaphore Projects
 GET http://localhost:8000/api/semaphore/projects
 Authorization: Bearer {{ api_token }}
