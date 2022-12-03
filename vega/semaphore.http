@@ -79,15 +79,18 @@ Authorization: Bearer {{ api_token }}
   "override_args": true
 }
 
+> {% client.global.set("semaphore_test_template_id", JSON.parse(String(response.body))["id"]);%}
+
 ### GET Semaphore Projects
 GET http://localhost:8000/api/semaphore/projects
 Authorization: Bearer {{ api_token }}
 
 ### POST Semaphore Run Task Template
-POST http://localhost:8000/api/semaphore/run-task-template
-Authorization: Bearer {{ api_token }}
+POST http://localhost:8000/api/semaphore/project/{{ semaphore_test_project_id }}/tasks
+cache-control: no-cache
 Content-Type: application/json
+Authorization: Bearer {{ api_token }}
 
 {
-  "template_id": 2
+  "id": {{ semaphore_test_template_id }}
 }

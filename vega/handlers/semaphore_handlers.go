@@ -685,15 +685,10 @@ func HandleSemaphoreCreateTemplate(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "missing environment id")
 	}
 
-	if err != nil {
-		log.Println(err)
-		return fiber.NewError(fiber.StatusForbidden, err.Error())
-	}
-
 	existingTemplate, err := getTemplateByName(pIdIntVal, template.Alias)
 
 	if err == nil {
-		return c.SendString(fmt.Sprintf("Template with name '%s' already exists", existingTemplate.Alias))
+		return c.SendString(fmt.Sprintf(`{"id": %d}`, existingTemplate.Id))
 	}
 
 	t, err := getUserToken()
@@ -717,6 +712,7 @@ func HandleSemaphoreCreateTemplate(c *fiber.Ctx) error {
 						  "repository_id": %d,
 						  "environment_id": %d,
 						  "alias": "%s",
+						  "name": "%s",
 						  "playbook": "%s",
 						  "description": "%s"
 						}`,
@@ -725,18 +721,19 @@ func HandleSemaphoreCreateTemplate(c *fiber.Ctx) error {
 				template.RepositoryId,
 				template.EnvironmentId,
 				template.Alias,
+				template.Alias,
 				template.Playbook,
 				template.Description,
 			),
 		).
-		Post(fmt.Sprintf("%s/api/project/%d/template", configs.Config.Semaphore.URL, pIdIntVal))
+		Post(fmt.Sprintf("%s/api/project/%d/templates", configs.Config.Semaphore.URL, pIdIntVal))
 
 	if err != nil {
-		log.Errorln(err)
+		log.Errorln(err, resp.Body())
 		return fiber.NewError(fiber.StatusInternalServerError, "An error occurred")
 	}
 
-	return c.SendString(fmt.Sprintf("%s", resp.Body()))
+	return c.SendString(fmt.Sprintf(`{"id": %d}`, existingTemplate.Id))
 }
 
 func getTemplateByName(pId int, name string) (models.Template, error) {
@@ -754,7 +751,7 @@ func getTemplateByName(pId int, name string) (models.Template, error) {
 		SetHeader("Content-Type", "application/json").
 		SetHeader("Accept", "application/json").
 		SetHeader("Authorization", fmt.Sprintf("Bearer %s", t.Value)).
-		Get(fmt.Sprintf("%s/api/project/%d/template", configs.Config.Semaphore.URL, pId))
+		Get(fmt.Sprintf("%s/api/project/%d/templates", configs.Config.Semaphore.URL, pId))
 
 	if err != nil {
 		log.Errorln(err)
@@ -771,7 +768,7 @@ func getTemplateByName(pId int, name string) (models.Template, error) {
 	}
 
 	for _, t := range templates {
-		if t.Alias == name {
+		if t.Name == name {
 			return t, nil
 		}
 	}
@@ -780,6 +777,30 @@ func getTemplateByName(pId int, name string) (models.Template, error) {
 }
 
 func HandleSemaphoreRunTaskTemplate(c *fiber.Ctx) error {
+	pId := c.Params("id")
+	if pId == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "missing project id")
+	}
+
+	pIdIntVal, err := strconv.Atoi(pId)
+
+	type RequestBody struct {
+		TemplateId int `json:"id"`
+	}
+	var r RequestBody
+
+	err = c.BodyParser(&r)
+	if err != nil {
+		log.Errorln(err)
+		return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
+	}
+
+	log.Infoln(r)
+
+	if r.TemplateId == 0 {
+		return fiber.NewError(fiber.StatusBadRequest, "missing template id")
+	}
+
 	t, err := getUserToken()
 
 	if err != nil {
@@ -795,12 +816,13 @@ func HandleSemaphoreRunTaskTemplate(c *fiber.Ctx) error {
 		SetHeader("Authorization", fmt.Sprintf("Bearer %s", t.Value)).
 		SetBody(
 			fmt.Sprintf(
-				`{"project_id": %d, "template_id": %d}`,
-				1,
-				1,
+				`{
+							"template_id": %d
+						}`,
+				r.TemplateId,
 			),
 		).
-		Post(fmt.Sprintf("%s/api/project/1/tasks", configs.Config.Semaphore.URL))
+		Post(fmt.Sprintf("%s/api/project/%d/tasks", configs.Config.Semaphore.URL, pIdIntVal))
 
 	if err != nil {
 		log.Println(err)

@@ -40,7 +40,7 @@ func SemaphoreRoutes(app *fiber.App) {
 	route.Post("/project/:id/inventory", handlers.HandleSemaphoreAddInventory)
 	route.Post("/project/:id/environment", handlers.HandleSemaphoreCreateEnvironment)
 	route.Post("/project/:id/templates", handlers.HandleSemaphoreCreateTemplate)
-	route.Post("/run-task-template", handlers.HandleSemaphoreRunTaskTemplate)
+	route.Post("/project/:id/tasks", handlers.HandleSemaphoreRunTaskTemplate)
 }
 
 func OpsRoutes(app *fiber.App) {

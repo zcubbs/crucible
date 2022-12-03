@@ -46,6 +46,7 @@ type Environment struct {
 type Template struct {
 	Id            int    `json:"id,omitempty"`
 	Alias         string `json:"alias"`
+	Name          string `json:"name"`
 	Playbook      string `json:"playbook"`
 	ProjectId     int    `json:"project_id"`
 	EnvironmentId int    `json:"environment_id"`
