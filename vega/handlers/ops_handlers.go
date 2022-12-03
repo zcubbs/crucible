@@ -6,6 +6,6 @@ import (
 )
 
 func HandleHealthCheck(c *fiber.Ctx) error {
-	msg := fmt.Sprintf("Up with 💚 by github.com/zcubbs & the DOOM soundtrack!")
+	msg := fmt.Sprintf("Up with 💚 by github.com/zcubbs")
 	return c.SendString(msg)
 }

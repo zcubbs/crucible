@@ -4,12 +4,14 @@ go 1.18
 
 require (
 	github.com/apenella/go-ansible v1.1.7
+	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/gofiber/fiber/v2 v2.40.0
 	github.com/gofiber/jwt/v3 v3.3.3
 	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/joho/godotenv v1.4.0
 	github.com/rabbitmq/amqp091-go v1.5.0
+	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/viper v1.14.0
 )
 

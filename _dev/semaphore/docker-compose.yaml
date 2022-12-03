@@ -46,5 +46,6 @@ services:
       SEMAPHORE_ACCESS_KEY_ENCRYPTION: gs72mPntFATGJs9qK0pQ0rKtfidlexiMjYCH9gWKhTU=
     depends_on:
       - postgres #change to postgres for postgres
+
 volumes:
   semaphore-postgres: #switch to semaphore-postgres to use postgres

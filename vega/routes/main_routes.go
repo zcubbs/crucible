@@ -37,6 +37,7 @@ func SemaphoreRoutes(app *fiber.App) {
 	route.Post("/projects", handlers.HandleSemaphoreCreateProject)
 	route.Post("/project/:id/repositories", handlers.HandleSemaphoreCreateRepository)
 	route.Post("/project/:id/keys", handlers.HandleSemaphoreCreateSSHKey)
+	route.Post("/project/:id/inventory", handlers.HandleSemaphoreAddInventory)
 	route.Post("/run-task-template", handlers.HandleSemaphoreRunTaskTemplate)
 }
 
