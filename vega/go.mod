@@ -14,6 +14,8 @@ require (
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/viper v1.14.0
 	github.com/uptrace/bun v1.1.9
+	github.com/zcubbs/crucible/core/postgres main
+	github.com/zcubbs/crucible/core/awx main
 	github.com/uptrace/bun/dialect/pgdialect v1.1.9
 	github.com/uptrace/bun/driver/pgdriver v1.1.9
 	github.com/uptrace/bun/extra/bundebug v1.1.9
