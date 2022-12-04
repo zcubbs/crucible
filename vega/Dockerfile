@@ -13,7 +13,6 @@ COPY . .
 # Set necessary environmet variables needed for our image and build the API server.
 ARG TARGETOS
 ARG TARGETARCH
-ARG GOPRIVATE
 ARG GH_ACCESS_TOKEN
 RUN git config --global url.https://$GH_ACCESS_TOKEN@github.com/.insteadOf https://github.com/
 RUN GOWORK=off GOOS=$TARGETOS GOARCH=$TARGETARCH go build \
