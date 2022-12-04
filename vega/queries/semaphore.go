@@ -2,9 +2,9 @@ package queries
 
 import (
 	"context"
-	"crucible/vega/models"
 	log "github.com/sirupsen/logrus"
 	"github.com/uptrace/bun"
+	"github.com/zcubbs/crucible/vega/models"
 )
 
 var Database *DB

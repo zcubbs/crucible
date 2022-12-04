@@ -1,4 +1,4 @@
-module crucible/vega
+module github.com/zcubbs/crucible/vega
 
 go 1.18
 

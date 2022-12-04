@@ -1,10 +1,10 @@
 package routes
 
 import (
-	"crucible/vega/configs"
-	"crucible/vega/handlers"
 	"github.com/gofiber/fiber/v2"
 	jwtMiddleware "github.com/gofiber/jwt/v3"
+	"github.com/zcubbs/crucible/vega/configs"
+	"github.com/zcubbs/crucible/vega/handlers"
 )
 
 func AuthRoutes(app *fiber.App) {

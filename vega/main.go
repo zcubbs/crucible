@@ -1,10 +1,6 @@
 package main
 
 import (
-	"crucible/core/postgres"
-	"crucible/vega/configs"
-	"crucible/vega/queries"
-	"crucible/vega/routes"
 	"fmt"
 	"github.com/common-nighthawk/go-figure"
 	"github.com/gofiber/fiber/v2"
@@ -12,6 +8,10 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/monitor"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	log "github.com/sirupsen/logrus"
+	"github.com/zcubbs/crucible/core/postgres"
+	"github.com/zcubbs/crucible/vega/configs"
+	"github.com/zcubbs/crucible/vega/queries"
+	"github.com/zcubbs/crucible/vega/routes"
 	"os"
 	"os/signal"
 	"syscall"

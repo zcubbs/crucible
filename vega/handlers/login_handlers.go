@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"crucible/vega/configs"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/zcubbs/crucible/vega/configs"
 	"time"
 )
 

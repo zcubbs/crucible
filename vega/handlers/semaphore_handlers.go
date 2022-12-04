@@ -1,15 +1,15 @@
 package handlers
 
 import (
-	"crucible/vega/configs"
-	"crucible/vega/models"
-	"crucible/vega/queries"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/go-resty/resty/v2"
 	"github.com/gofiber/fiber/v2"
 	log "github.com/sirupsen/logrus"
+	"github.com/zcubbs/crucible/vega/configs"
+	"github.com/zcubbs/crucible/vega/models"
+	"github.com/zcubbs/crucible/vega/queries"
 	"io/ioutil"
 	"net/http"
 	"strconv"

@@ -1,0 +1,21 @@
+version: "3.7"
+
+services:
+  host:
+    build:
+      context: ./host
+      dockerfile: Dockerfile
+    container_name: host
+
+  control:
+    build:
+      context: ./control
+      dockerfile: Dockerfile
+    container_name: control
+    volumes:
+      - ../go.mod:/home/ubuntu/seraphim/go.mod
+      - ../go.sum:/home/ubuntu/seraphim/go.sum
+      - ../main.go:/home/ubuntu/seraphim/main.go
+      - ../pkg:/home/ubuntu/seraphim/pkg
+      - ./testdata/playbook.yaml:/home/ubuntu/seraphim/playbook.yaml
+      - ./testdata/inventory:/home/ubuntu/seraphim/inventory

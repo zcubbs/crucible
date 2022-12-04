@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"crucible/core/awx"
-	"crucible/vega/configs"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/zcubbs/crucible/core/awx"
+	"github.com/zcubbs/crucible/vega/configs"
 	"log"
 	"net/http"
 	"strconv"

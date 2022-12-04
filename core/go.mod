@@ -1,4 +1,4 @@
-module crucible/core
+module github.com/zcubbs/crucible/core
 
 go 1.18
 
