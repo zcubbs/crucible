@@ -9,6 +9,12 @@ AWX templates, credentials, and inventories through yaml config. The cli can als
 
 ---
 
+## Architecture
+
+![](_assets/crucible_arch.png)
+
+---
+
 ## CLI
 
 ```cmd

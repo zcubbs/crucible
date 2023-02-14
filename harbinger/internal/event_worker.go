@@ -1,10 +1,10 @@
 package internal
 
 import (
-	"crucible/core/rabbitmq"
 	"encoding/json"
 	"fmt"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/zcubbs/crucible/core/rabbitmq"
 	"log"
 	"time"
 )

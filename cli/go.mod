@@ -1,4 +1,4 @@
-module crucible/cli
+module github.com/zcubbs/crucible/cli
 
 go 1.18
 

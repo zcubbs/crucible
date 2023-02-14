@@ -1,8 +1,8 @@
 package main
 
 import (
-	"crucible/seraphim/pkg/gocotea"
 	"fmt"
+	"github.com/zcubbs/crucible/seraphim/pkg/gocotea"
 	"log"
 )
 

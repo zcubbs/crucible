@@ -1,8 +1,8 @@
 package main
 
 import (
-	"crucible/cli/cmd"
-	"crucible/cli/configs"
+	"github.com/zcubbs/crucible/cli/cmd"
+	"github.com/zcubbs/crucible/cli/configs"
 )
 
 func main() {

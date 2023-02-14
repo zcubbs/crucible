@@ -1,10 +1,10 @@
 package main
 
 import (
-	"crucible/core/rabbitmq"
-	"crucible/harbinger/configs"
-	"crucible/harbinger/internal"
 	"fmt"
+	"github.com/zcubbs/crucible/core/rabbitmq"
+	"github.com/zcubbs/crucible/harbinger/configs"
+	"github.com/zcubbs/crucible/harbinger/internal"
 	"log"
 )
 

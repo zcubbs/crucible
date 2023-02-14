@@ -1,4 +1,4 @@
-module crucible/seraphim
+module github.com/zcubbs/crucible/seraphim
 
 go 1.18
 
